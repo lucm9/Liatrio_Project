@@ -1,0 +1,6 @@
+*.terraform*
+*.DS_Store
+*package*
+*terraform*
+node_modules
+*kubeconfig*
