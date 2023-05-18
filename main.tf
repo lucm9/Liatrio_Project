@@ -21,6 +21,19 @@ module "eks" {
   node_subnet_ids = [module.vpc.subnet1, module.vpc.subnet2]
 }
 
+
+resource "time_sleep" "wait_120_seconds" {
+  depends_on = [module.eks]
+
+  create_duration = "120s"
+}
+
+# This resource will create (at least) 30 seconds after null_resource.previous
+resource "null_resource" "next" {
+  depends_on = [time_sleep.wait_120_seconds]
+}
+
+
 module "helm_deploy_local" {
   source                 = "./modules/helm"
   deployment_name        = "sample-app"             ## Release name in the namespace
@@ -30,4 +43,6 @@ module "helm_deploy_local" {
   template_custom_vars = {
     deployment_image = "${data.aws_caller_identity.current.id}.dkr.ecr.${data.aws_region.current.id}.amazonaws.com/sample-docker:latest"
   }
+
+  depends_on = [ null_resource.next ]
 }
